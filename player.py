@@ -10,7 +10,7 @@ class Player:
         # Player unit coins
         self.assigned_units: dict = {}
         self.bag: list = []
-        self.hand: set = set()
+        self.hand: list = []
         self.discarded: list = []
         self.control_tokens: int = 3
 
@@ -27,6 +27,12 @@ class Player:
             if unit.unit_type == 'Royal':
                 continue
             print(f'{unit.unit_type} = {no_units}, ', end='')
+        print()
+
+    def print_hand(self):
+        print('Hand: ', end='')
+        for unit in self.hand:
+            print(f'{unit.unit_type}, ', end='')
         print()
 
     # Get three random units from the bag to place inside the hand
@@ -54,7 +60,7 @@ class Player:
             unit = self.bag[unit_no]
             print(f'{unit.unit_type}, ', end='')
             # Add to our hand
-            self.hand.add(unit_no)
+            self.hand.append(unit)
             # Remove from the bag
             del self.bag[unit_no]
         print()

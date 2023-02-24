@@ -77,12 +77,11 @@ def play_game():
         # Show player information (hand, recruitment pieces, discard pile & control tokens)
         # If the method returns False that means the curr_player couldn't create a hand, therefore ending the game
         if not show_player_information(curr_player):
-            winner = crow.name if curr_player == crow else wolf.name
+            winner = crow.name if curr_player.has_initiative or curr_player == crow else wolf.name
             break
 
         # Make action until hand is empty (or the equivalent to three moves)
         prompt_player_actions(board, curr_player)
-        print(f'Player bag after doing all the moves: {curr_player.bag}')
     
     print(f'\nThe winner of the game is {winner}!\n')
 

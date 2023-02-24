@@ -2,9 +2,8 @@ from player import Player
 
 # Unit class with its respective methods and properties
 class Unit:
-    def __init__(self, player: Player = None, no_of_units: int = 0, unit_type: str = 'Empty', unit_symbol: str = '·'):
+    def __init__(self, player: Player = None, unit_type: str = 'Empty', unit_symbol: str = '·'):
         self.player = player
-        self.no_of_units = no_of_units
         self.unit_type = unit_type
         self.unit_symbol = unit_symbol
 
@@ -14,6 +13,13 @@ class Unit:
     def attack(self):
         pass
 
+    def is_orthogonal(self, start: tuple, end: tuple):
+        x1, y1 = start 
+        x2, y2 = end 
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        return (dx == 1 and dy == 0) or (dx == 0 and dy == 1)
+
 # Archer class with its respective methods and properties
 class Archer(Unit):
     def __init__(self):
@@ -21,10 +27,14 @@ class Archer(Unit):
         self.unit_type: str = 'Archer'
         self.unit_symbol: str = 'A'
     
-    def move(self):
-        print('I move the archer way')
+    def move(self, from_position, to_position):
+        # Archer can only move one orthogonal space
+        if not self.is_orthogonal(from_position, to_position):
+            print('Archers can only move 1 unit at a time in an orthogonal way')
+            return False 
+        return True
 
-    def attack(self):
+    def attack(self, from_position, to_position):
         print('I attack the archer way')
 
 # Knight class with its respective methods and properties
