@@ -17,9 +17,9 @@ class Unit:
 # Archer class with its respective methods and properties
 class Archer(Unit):
     def __init__(self):
-        self.no_of_units = 4
-        self.unit_type = 'Archer'
-        self.unit_symbol = 'A'
+        super().__init__(self)
+        self.unit_type: str = 'Archer'
+        self.unit_symbol: str = 'A'
     
     def move(self):
         print('I move the archer way')
@@ -31,9 +31,8 @@ class Archer(Unit):
 class Knight(Unit):
     def __init__(self):
         super().__init__(self)
-        self.no_of_units = 5
-        self.unit_type = 'Knight'
-        self.unit_symbol = 'K'
+        self.unit_type: str = 'Knight'
+        self.unit_symbol: str = 'K'
     
     def move(self):
         print('I move the knight way')
@@ -45,9 +44,8 @@ class Knight(Unit):
 class Mercenary(Unit):
     def __init__(self):
         super().__init__(self)
-        self.no_of_units = 5
-        self.unit_type = 'Mercenary'
-        self.unit_symbol = 'M'
+        self.unit_type: str = 'Mercenary'
+        self.unit_symbol: str = 'M'
     
     def move(self):
         print('I move the mercenary way')
@@ -59,9 +57,8 @@ class Mercenary(Unit):
 class Berserker(Unit):
     def __init__(self):
         super().__init__(self)
-        self.no_of_units = 4
-        self.unit_type = 'Berserker'
-        self.unit_symbol = 'B'
+        self.unit_type: str = 'Berserker'
+        self.unit_symbol: str = 'B'
     
     def move(self):
         print('I move the berserker way')
@@ -73,9 +70,8 @@ class Berserker(Unit):
 class Royal(Unit):
     def __init__(self):
         super().__init__(self)
-        self.no_of_units = 1
-        self.unit_type = 'Royal'
-        self.unit_symbol = 'R'
+        self.unit_type: str = 'Royal'
+        self.unit_symbol: str = 'R'
     
     def move(self):
         print('I move the royal way')
