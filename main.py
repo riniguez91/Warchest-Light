@@ -29,24 +29,33 @@ def initialize_player(player: Player, units: list[Unit]):
         del units[random_no]
     
     # Add the royal card (one available to each player)
-    player.assigned_units[Royal()] = 1
+    royal_unit = Royal()
+    player.assigned_units[royal_unit] = 1
+    player.bag.append(royal_unit)
     return player
 
 def show_player_information(player: Player):
-    print(f'  ===== {player.name} =====')
+    print(f'  === {player.name} ({player.symbol}) ===')
     # Other player has won if the current player can't create a new hand
     if not player.get_hand():
         return False
     player.get_recruitment_units()
     player.get_discard_pile()
     player.get_control_tokens()
+    
+    return True
+
+def prompt_player_actions(board: Board, player: Player):
+    # Prompt the user to choose three actions
+    for _ in range(3):
+        board.choose_action(player)
 
 def play_game():
     # Initialize the list of units where the tuple represents (type of unit, the no. of units corresponding to it)
     units: list[tuple]= [(Archer(), 4), (Knight(), 5), (Mercenary(), 5), (Berserker(), 4)]
     # Initialize players
-    crow: Player = initialize_player(Player('CROW'), units)
-    wolf: Player = initialize_player(Player('WOLF'), units)
+    crow: Player = initialize_player(Player('CROW', 's'), units)
+    wolf: Player = initialize_player(Player('WOLF', 'v'), units)
     # Initialize board
     board: Board = Board(crow, wolf)
     # Set random starting player
@@ -60,16 +69,20 @@ def play_game():
         # Show board
         board.print_board()
 
-        # Decide player turn
-        
+        # Decide player turn only if the current player has no initiative action
+        if not curr_player.has_initiative:
+            # Swap turns
+            curr_player = crow if curr_player == wolf else wolf
+
         # Show player information (hand, recruitment pieces, discard pile & control tokens)
         # If the method returns False that means the curr_player couldn't create a hand, therefore ending the game
         if not show_player_information(curr_player):
             winner = crow.name if curr_player == crow else wolf.name
             break
 
-        break
         # Make action until hand is empty (or the equivalent to three moves)
+        prompt_player_actions(board, curr_player)
+        print(f'Player bag after doing all the moves: {curr_player.bag}')
     
     print(f'\nThe winner of the game is {winner}!\n')
 

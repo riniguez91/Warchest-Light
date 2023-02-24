@@ -2,8 +2,12 @@ import random
 
 # Player class with its respective methods and properties
 class Player:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name, symbol):
+        # Player information
+        self.name: str = name
+        self.symbol: str = symbol
+        self.has_initiative: bool = False
+        # Player unit coins
         self.assigned_units: dict = {}
         self.bag: list = []
         self.hand: set = set()
@@ -59,6 +63,8 @@ class Player:
     # Print the discarded pile for the current player
     def get_discard_pile(self):
         print('Discard pile: ', end='')
+        for unit in self.discarded:
+            print(f'{unit.unit_type}, ', end='')
         print()
 
     def get_control_tokens(self):

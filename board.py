@@ -3,7 +3,7 @@ from player import Player
 
 class Board:
     def __init__(self, crow: Player, wolf: Player):
-        self.board = [[Cell(row, col, Unit()) for col in range(5)] for row in range(5)]
+        self.board: list = [[Cell(row, col, Unit()) for col in range(5)] for row in range(5)]
         # Set the initial control points
         self.control_points(crow, wolf)
 
@@ -20,7 +20,7 @@ class Board:
 
     def print_board(self):
         # letter_to_num = {'a': 0, 'b': '1', 'c': 2, 'd': 3, 'e': 4}
-        letters = ['a', 'b', 'c', 'd', 'e']
+        letters: list = ['a', 'b', 'c', 'd', 'e']
 
         print('\n    0  1  2  3  4')
         print('    -------------')
@@ -29,3 +29,53 @@ class Board:
             for j in range(len(self.board[0])):
                 print(f'  {self.board[i][j].unit.unit_symbol}', end='')
             print()
+    
+    def choose_action(self, player):
+        action = str(input('Make an action (move/recruit/place/attack/control/initiative/forfeit): '))
+        # match statement requires python 3.10+
+        match action.lower():
+            case 'move':
+                self.move(player)
+
+            case 'recruit':
+                self.recruit(player)
+
+            case 'place':
+                self.place(player)
+
+            case 'attack':
+                self.attack(player)
+
+            case 'control':
+                self.control(player)
+
+            case 'initiative':
+                self.initiative(player)
+
+            case 'forfeit':
+                self.forfeit(player)
+
+            case _:
+                print('That is not a valid action, please try again.')
+                
+    
+    def move(self, player):
+        print('move message')
+
+    def recruit(self, player):
+        print('recruit message')
+
+    def place(self, player):
+        print('place message')
+
+    def attack(self, player):
+        print('attack message')
+
+    def control(self, player):
+        print('control message') 
+
+    def initiative(self, player):
+        print('initiative message')
+
+    def forfeit(self, player):
+        print('forfeit message')
