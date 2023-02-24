@@ -22,11 +22,11 @@ class Player:
             return False 
         
         print('Recruitment pieces: ', end='')
-        for unit, no_units in self.assigned_units.items():
+        for unit_type, units in self.assigned_units.items():
             # Skip the royal card since it can't be recruited
-            if unit.unit_type == 'Royal':
+            if unit_type == 'Royal':
                 continue
-            print(f'{unit.unit_type} = {no_units}, ', end='')
+            print(f'{unit_type} = {len(units)}, ', end='')
         print()
 
     def print_hand(self):
@@ -50,6 +50,7 @@ class Player:
             self.bag.append(unit_coin)
 
             # Remove it from the discarded pile
+            print(f'Removed {unit_coin.unit_type} from the discarded pile and added it to the bag since there were less than 3 unit coins in the bag')
             del self.discarded[retrieved_coins]
             retrieved_coins += 1
         

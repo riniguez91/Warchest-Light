@@ -13,6 +13,17 @@ def main():
     else:
         print('\nYou exited the game.\n')
 
+def generate_unit_coin(unit: str, player: Player):
+    match unit:
+        case 'Archer':
+            return Archer(player)
+        case 'Knight':
+            return Knight(player)
+        case 'Mercenary':
+            return Mercenary(player)
+        case 'Berserker':
+            return Berserker(player)
+
 def initialize_player(player: Player, units: list[Unit]):
     # Repeat until we have assigned two units to the player
     for _ in range(2):
@@ -20,22 +31,28 @@ def initialize_player(player: Player, units: list[Unit]):
         random_no: int = random.randint(0, len(units) - 1)
         # Get the unit and no_of_units assigned to it
         unit, no_of_units = units[random_no][0], units[random_no][1]
-        # Assign them to our player assigned units (remembering to remove two units we inserted in the player bag)
-        player.assigned_units[unit] = no_of_units - 2
-        # Place two of the units in the bag
-        for _ in range(2):
-            player.bag.append(unit)
+        # Create two unit coins
+        unit_coin_one, unit_coin_two = generate_unit_coin(unit, player), generate_unit_coin(unit, player)
+
+        # The assigned units dictionary follows the structure '{ unit_type: [stack of class Units] }'
+        player.assigned_units[unit] = []
+        # Create the stack of unit coins (remembering to remove two units we inserted in the player bag)
+        for _ in range(no_of_units - 2):
+            player.assigned_units[unit].append(generate_unit_coin(unit, player))
+
+        # Place the two units in the bag
+        player.bag.append(unit_coin_one)
+        player.bag.append(unit_coin_two)
         # Remove them from the pool of available units
         del units[random_no]
     
     # Add the royal card (one available to each player)
-    royal_unit = Royal()
-    player.assigned_units[royal_unit] = 1
+    royal_unit: Royal = Royal()
     player.bag.append(royal_unit)
     return player
 
 def show_player_information(player: Player):
-    print(f'  === {player.name} ({player.symbol}) ===')
+    print(f'  ==== {player.name} ({player.symbol}) ====')
     # Other player has won if the current player can't create a new hand
     if not player.get_hand():
         return False
@@ -52,7 +69,7 @@ def prompt_player_actions(board: Board, player: Player):
 
 def play_game():
     # Initialize the list of units where the tuple represents (type of unit, the no. of units corresponding to it)
-    units: list[tuple]= [(Archer(), 4), (Knight(), 5), (Mercenary(), 5), (Berserker(), 4)]
+    units: list[tuple]= [('Archer', 4), ('Knight', 5), ('Mercenary', 5), ('Berserker', 4)]
     # Initialize players
     crow: Player = initialize_player(Player('CROW', 's'), units)
     wolf: Player = initialize_player(Player('WOLF', 'v'), units)
