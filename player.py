@@ -2,6 +2,20 @@ import random
 
 # Player class with its respective methods and properties
 class Player:
+    """
+    A class to represent a Player.
+
+    Attributes:
+        name: The player name
+        symbol: The player symbol
+        has_initiative: Allows the player to play 2 rounds in a row
+        initiative_count: Limits the number of rounds played to 2 at most.
+        assigned_units: Dictionary following the structure {unit_type: [stack of Unit class objects]}
+        bag: List following the structure: [list of Unit class objects]
+        hand: List following the structure: [list of Unit class objects]
+        discarded: List following the structure: [list of Unit class objects]
+        control_tokens: The number of remaining control tokens the player has.
+    """
     def __init__(self, name, symbol) -> None:
         # Player information
         self.name: str = name
@@ -16,7 +30,13 @@ class Player:
         self.control_tokens: int = 3
 
     # Print the number of available recruitment pieces
-    def get_recruitment_units(self):
+    def get_recruitment_units(self) -> bool:
+        """
+        Shows the current status of the recruitment units for a player.
+
+        Returns:
+            False if there are no assigned and discarded units left, True in any other case.
+        """
         # If there are no more units inside the assigned_units and the discarded pile, the player has lost 
         # (no more hands can be made and thus no more moves can be made)
         if len(self.assigned_units) == 0 and len(self.discarded) == 0:
@@ -30,14 +50,23 @@ class Player:
             print(f'{unit_type} = {len(units)}, ', end='')
         print()
 
-    def print_hand(self):
+    def print_hand(self) -> None:
+        """
+        Shows the current status of the player hand.
+        """
         print('Hand: ', end='')
         for unit in self.hand:
             print(f'{unit.unit_type}, ', end='')
         print()
 
     # Get three random units from the bag to place inside the hand
-    def get_hand(self):
+    def get_hand(self) -> bool:
+        """
+        Shows the current status of the player hand, if no hands can be made that means that player has lost.
+
+        Returns:
+            False if no more hands can be made, True in any other case.
+        """
         # If its not possible to get a hand by retrieving 3 coins from the bag, try to fill in the bag based
         # on the discarded unit coins (if there are any)
         while len(self.bag) < 3:
@@ -72,12 +101,18 @@ class Player:
         return True
 
     # Print the discarded pile for the current player
-    def print_discard_pile(self):
+    def print_discard_pile(self) -> None:
+        """
+        Shows the current status of the player discard pile.
+        """
         print('Discard pile: ', end='')
         for unit in self.discarded:
             print(f'{unit.unit_type}, ', end='')
         print()
 
-    def print_control_tokens(self):
+    def print_control_tokens(self) -> None:
+        """
+        Shows the remaning control tokens a player has.
+        """
         print(f'\nControl tokens: {self.control_tokens}\n\n')
 

@@ -5,7 +5,9 @@ from player import Player
 from cell import Archer, Knight, Mercenary, Berserker, Unit, Royal
 
 def main():
-    # Main entry point of the app
+    """
+    Main entry point of the app, gives the user the option to start the game.
+    """
     start_game = str(input('Start game? (y/n): '))
     if start_game == 'y':
         # Start the game
@@ -13,7 +15,17 @@ def main():
     else:
         print('\nYou exited the game.\n')
 
-def generate_unit_coin(unit: str, player: Player):
+def generate_unit_coin(unit: str, player: Player) -> Player:
+    """
+    Generates a subclass of the Unit class objects depending on how it matches to the selected unit.
+
+    Args:
+        unit: The type of unit for which to create its relevant class.
+        player: The player class object defining the current player.
+    
+    Returns:
+        The relevant subclass of the Unit class.
+    """
     match unit:
         case 'Archer':
             return Archer(player)
@@ -24,7 +36,17 @@ def generate_unit_coin(unit: str, player: Player):
         case 'Berserker':
             return Berserker(player)
 
-def initialize_player(player: Player, units: list[Unit]):
+def initialize_player(player: Player, units: list[Unit]) -> Player:
+    """
+    Initializes a Player class object along with its relevant attributes: bag, assigned units etc.
+
+    Args:
+        player: The player class object defining the current player.
+        units: A list of Unit class objects containing the units which are used to assign a certain number to the player.
+
+    Returns:
+        The Player class object with its initialized properties. 
+    """
     # Repeat until we have assigned two units to the player
     for _ in range(2):
         # Generate the random number
@@ -51,7 +73,16 @@ def initialize_player(player: Player, units: list[Unit]):
     player.bag.append(royal_unit)
     return player
 
-def show_player_information(player: Player):
+def show_player_information(player: Player) -> bool:
+    """
+    Shows the current player playing, as well as the status of its recruitment units, discard pile and control tokens.
+
+    Args:
+        player: The player class object defining the current player.
+    
+    Returns:
+        True if the game can continue, False if it has ended due to the inability to make more hands.
+    """
     print(f'  ==== {player.name} ({player.symbol}) ====')
     # Other player has won if the current player can't create a new hand
     if not player.get_hand():
@@ -62,14 +93,37 @@ def show_player_information(player: Player):
     
     return True
 
-def prompt_player_actions(board: Board, player: Player):
+def prompt_player_actions(board: Board, player: Player) -> bool:
+    """
+    Defines the logic of how the game is played, involving the relevant actions until the player hand is empty.
+
+    Args:
+        board: The Board class object, containing the grid with the unit coins.
+        player: The Player class object defining the current player.
+
+    Returns:
+        True if the user has forfeited, False if it is not the case and so the game can go on.
+    """
     # Prompt the user to choose three actions
     for _ in range(3):
         forfeit = board.choose_action(player)
         if forfeit:
             return True
         
-def swap_turns(curr_player: Player, player1: Player, player2: Player):
+    return False
+        
+def swap_turns(curr_player: Player, player1: Player, player2: Player) -> Player:
+    """
+    Returns the current player by swapping turns based on the previous current player.
+
+    Args:
+        curr_player: The current Player class object.
+        player1: Player 1 class object.
+        player2: Player 2 class object.
+
+    Returns:
+        The current player after doing the relevant logic.
+    """
     # Make sure that a player can only play at most two rounds in row
     if curr_player.has_initiative:
         curr_player.initiative_count += 1
@@ -82,7 +136,11 @@ def swap_turns(curr_player: Player, player1: Player, player2: Player):
     
     return curr_player
 
-def play_game():
+def play_game() -> None:
+    """
+    Contains the logic which initializes the units, players, board and allows the players to keep playing until there
+    is a winner.
+    """
     # Initialize the list of units where the tuple represents (type of unit, the no. of units corresponding to it)
     units: list[tuple]= [('Archer', 4), ('Knight', 5), ('Mercenary', 5), ('Berserker', 4)]
     # Initialize players
@@ -120,5 +178,8 @@ def play_game():
 
 
 if __name__ == "__main__":
+    """
+    Standard python boilerplate.
+    """
     # This is executed when run from the command line
     main()
