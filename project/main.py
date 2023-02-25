@@ -3,6 +3,7 @@ import random
 from board import Board
 from player import Player
 from cell import Archer, Knight, Mercenary, Berserker, Unit, Royal
+from high_scores import high_scores
 
 def main():
     """
@@ -136,11 +137,26 @@ def swap_turns(curr_player: Player, player1: Player, player2: Player) -> Player:
     
     return curr_player
 
+def get_high_scores() -> None:
+    """
+    Prints the high scores obtained from the database, ordered by the most recent first.
+    """
+    results: list = high_scores()
+    
+    # Print the results
+    print("High scores:")
+    for row in results:
+        print(f"{row[0]} - {row[1]} victories on {row[2]}")
+
+
 def play_game() -> None:
     """
     Contains the logic which initializes the units, players, board and allows the players to keep playing until there
     is a winner.
     """
+    # Show high scores
+    get_high_scores()
+
     # Initialize the list of units where the tuple represents (type of unit, the no. of units corresponding to it)
     units: list[tuple]= [('Archer', 4), ('Knight', 5), ('Mercenary', 5), ('Berserker', 4)]
     # Initialize players
