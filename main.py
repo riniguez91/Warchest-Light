@@ -65,7 +65,22 @@ def show_player_information(player: Player):
 def prompt_player_actions(board: Board, player: Player):
     # Prompt the user to choose three actions
     for _ in range(3):
-        board.choose_action(player)
+        forfeit = board.choose_action(player)
+        if forfeit:
+            return True
+        
+def swap_turns(curr_player: Player, player1: Player, player2: Player):
+    # Make sure that a player can only play at most two rounds in row
+    if curr_player.has_initiative:
+        curr_player.initiative_count += 1
+        if curr_player.initiative_count >= 2:
+            curr_player.has_initiative = False
+            curr_player.initiative_count = 0
+            curr_player = player1 if curr_player == player2 else player2
+    else:
+        curr_player = player1 if curr_player == player2 else player2
+    
+    return curr_player
 
 def play_game():
     # Initialize the list of units where the tuple represents (type of unit, the no. of units corresponding to it)
@@ -80,27 +95,28 @@ def play_game():
 
     # Stop the game when there is a winning condition
     game_ended: bool = False
-    winner: str = ''
     
     while not game_ended:
         # Show board
         board.print_board()
 
-        # Decide player turn only if the current player has no initiative action
-        if not curr_player.has_initiative:
-            # Swap turns
-            curr_player = crow if curr_player == wolf else wolf
+        # Decide player turn
+        curr_player = swap_turns(curr_player, crow, wolf)
 
         # Show player information (hand, recruitment pieces, discard pile & control tokens)
-        # If the method returns False that means the curr_player couldn't create a hand, therefore ending the game
-        if not show_player_information(curr_player):
-            winner = crow.name if curr_player.has_initiative or curr_player == crow else wolf.name
+        # If the method returns False that means the curr_player couldn't create a hand
+        # or the player forfeited, therefore ending the game
+        if not show_player_information(curr_player) or prompt_player_actions(board, curr_player):
+            # Swap the curr_player to the previous player since that is the winner
+            curr_player = wolf if curr_player == crow else crow
             break
 
-        # Make action until hand is empty (or the equivalent to three moves)
-        prompt_player_actions(board, curr_player)
-    
-    print(f'\nThe winner of the game is {winner}!\n')
+        # If the player control tokens have reached 0, we have a winner
+        if curr_player.control_tokens == 0:
+            game_ended = True
+
+
+    print(f'\nThe winner of the game is {curr_player.name}!\n')
 
 
 if __name__ == "__main__":

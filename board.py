@@ -37,36 +37,37 @@ class Board:
 
     def choose_action(self, player: Player):
         action = str(input('Make an action (move/recruit/place/attack/control/initiative/forfeit): '))
-        successful_action = False
+        forfeit = False
         # match statement requires python 3.10+
         match action.lower():
             case 'move':
-                successful_action = self.move(player)
+                self.move(player)
             
             case 'recruit':
-                successful_action = self.recruit(player)
+                self.recruit(player)
 
             case 'place':
-                successful_action = self.place(player)
+                self.place(player)
 
             case 'attack':
-                successful_action = self.attack(player)
+                self.attack(player)
 
             case 'control':
-                successful_action = self.control(player)
+                self.control(player)
 
             case 'initiative':
-                successful_action = self.initiative(player)
+                self.initiative(player)
 
             case 'forfeit':
-                self.forfeit(player)
+                forfeit = True
 
             case _:
                 print('That is not a valid action, please try again.')
 
-        # If there has been a successful action, show the current state of the player hand
-        if successful_action:
+        # Show the current state of the player hand
+        if not forfeit:
             player.print_hand()
+        return forfeit
 
     def remove_piece_from_hand(self, piece: str, player: Player):
         for unit in player.hand:
@@ -196,22 +197,22 @@ class Board:
         # Check if the from_position is a valid position
         from_position = str(input('From position (row, col): '))
         if not self.valid_board_position(from_position):
-            return False
+            return
         
         unit: Unit = self.get_unit(from_position)
         # Check the position isn't empty and belongs to the player (but is not a control point)
         if not self.valid_start_position(unit, player):
-            return False 
+            return 
         
         # Check the piece to move is contained in the hand and the board
         piece = str(input('Select a piece of the same type in your hand: '))
         if not (self.piece_in_hand(piece, player) and unit.unit_type == piece):
-            return False
+            return
         
         to_position = str(input('To position (row, col): '))
         # Check if the to_position is a valid position
         if not self.valid_board_position(to_position):
-            return False
+            return
         
         # Get the translated coordinates
         translated_start = self.translate_to_coordinate(from_position)
@@ -219,79 +220,95 @@ class Board:
 
         # Check the to_position is either a control unit or an empty unit
         if not self.valid_end_position(translated_end):
-            return False
+            return
         
         # returns True if it was a valid move, False if it was invalid
         if not unit.move(translated_start, translated_end):
-            return False
+            return
         
         # Change the board status given that all of the above operations were valid
-        self.board[translated_start[0]][translated_start[1]].unit = Unit()
-        self.board[translated_end[0]][translated_end[1]].unit = unit
+        # Revert the previous cell to its previous unit status
+        prev_cell: Cell = self.board[translated_start[0]][translated_start[1]]
+        prev_cell.unit = prev_cell.previous_unit
+        # Assign the new cell previous unit to its actual unit, and then change the actual unit to the new unit
+        new_cell: Cell = self.board[translated_end[0]][translated_end[1]]
+        new_cell.previous_unit = new_cell.unit
+        new_cell.unit = unit
         # Remove from hand
         self.remove_piece_from_hand(unit.unit_type, player)
-
-        return True
 
     def recruit(self, player: Player):
         # Check the piece is in the hand
         piece_to_discard = str(input('Piece to discard from hand to recruit the same kind: '))
         if not self.piece_in_hand(piece_to_discard, player, remove=True, discard=True):
-            return False
+            return
         
         # Check there are available units in order to recruit
         piece_to_recruit = str(input(f'Used {piece_to_discard} coin, type the piece you want to recruit: '))
         if not self.can_recruit_piece(piece_to_recruit, player):
-            return False
-
-        return True
+            return
 
     def place(self, player: Player):
         piece_to_place = str(input('Piece to place from hand: '))
         # Check the piece is in the hand
         if not self.piece_in_hand(piece_to_place, player):
-            return False
+            return
         
         # Check it's not a royal unit (they can't be placed in the board)
         if piece_to_place == 'Royal':
             print('Royal unit coins can not be placed in the board')
-            return False
+            return
 
         position_to_place = str(input('Position to place (row, col): '))
         # Check if the position to place is a valid position
         if not self.valid_board_position(position_to_place):
-            return False
+            return
         
         translated_coordinate = self.translate_to_coordinate(position_to_place)
         # Only allow the position where the unit will be placed to be an 'Empty' unit
         if not self.valid_end_position(translated_coordinate, control_pos_allowed=False):
-            return False
+            return
         
         # Check its orthogonal to a control point
         if not self.is_orthogonal_to_control(translated_coordinate, player):
-            return False
+            return
         
         # Place it in the board
         row, col = translated_coordinate[0], translated_coordinate[1]
+        # Save it's previous status so we can revert back to it whenever a piece moves from that position
+        self.board[row][col].previous_unit = self.board[row][col].unit
         self.board[row][col].unit = self.get_unit_from_hand(piece_to_place, player, remove=True)
-
-        return True
 
     def attack(self, player: Player):
         print('attack message')
 
     def control(self, player: Player):
-        print('control message') 
+        piece_to_discard = str(input('Piece to discard from hand: '))
+        # Check the piece is in the hand
+        if not self.piece_in_hand(piece_to_discard, player, remove=True, discard=True):
+            return
+        
+        position_to_control = str(input('Position to control (row, col): '))
+        # Check if the position to control is a valid position
+        if not self.valid_board_position(position_to_control):
+            return
+        
+        # Check it is in fact a control unit
+        translated_coordinate = self.translate_to_coordinate(position_to_control) 
+        row, col = translated_coordinate[0], translated_coordinate[1]
+        if self.board[row][col].previous_unit.unit_type != 'Control':
+            print('The current coordinate does not contain a control unit')
+            return
+        
+        # Since none of the above error-check conditions were satisfied, control the coordianate
+        curr_cell = self.board[row][col]
+        curr_cell.previous_unit = Unit(player, 'Control', 'C')
+        player.control_tokens -= 1
 
     def initiative(self, player: Player):
         piece = str(input('Piece to discard from hand: '))
-        # TODO: Allow for user input by changing it to lower case
+        # Improvement: Allow for user input by changing it to lower case
         if self.piece_in_hand(piece, player, remove=True, discard=True):
             # Give player initiative
             player.has_initiative = True
-            return True
-        # TODO: Make the user retype input until its valid
-        return False
-
-    def forfeit(self, player: Player):
-        print('forfeit message')
+            return

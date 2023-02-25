@@ -101,7 +101,8 @@ class Royal(Unit):
 
 # Cell class with its respective methods and properties
 class Cell:
-    def __init__(self, row: int = 0, col: int = 0, unit: Unit = None):
+    def __init__(self, row: int = 0, col: int = 0, unit: Unit = None, previous_unit: Unit = None):
         self.row = row
         self.col = col
         self.unit = unit
+        self.previous_unit = previous_unit

@@ -7,6 +7,7 @@ class Player:
         self.name: str = name
         self.symbol: str = symbol
         self.has_initiative: bool = False
+        self.initiative_count: int = 0
         # Player unit coins
         self.assigned_units: dict = {}
         self.bag: list = []
@@ -54,6 +55,9 @@ class Player:
             del self.discarded[retrieved_coins]
             retrieved_coins += 1
         
+        # Reset the hand in case it hasn't been emptied due to a user input error
+        self.hand = []
+
         print('Hand: ', end='')
         # Get three coins from the bag to place inside the hand
         for _ in range(3):
