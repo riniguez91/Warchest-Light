@@ -10,7 +10,7 @@ class Board:
         letter_to_num: Translated a letter to a row coordinate
     """
     def __init__(self, crow: Player, wolf: Player) -> None:
-        self.board: list = [[Cell(row, col, Unit()) for col in range(5)] for row in range(5)]
+        self.grid: list = [[Cell(row, col, Unit()) for col in range(5)] for row in range(5)]
         # Translates a letter to its respective row coordinate
         self.letter_to_num: dict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4}
         # Set the initial control points
@@ -26,15 +26,15 @@ class Board:
             wolf: Player class object belonging to the wolf player.
         """
         # Crow starting control point
-        self.board[0][2] = Cell(0, 2, Unit(crow, 'Control', 'C'))
+        self.grid[0][2] = Cell(0, 2, Unit(crow, 'Control', 'C'))
         # Wolf starting control point
-        self.board[4][2] = Cell(4, 2, Unit(wolf, 'Control', 'C')) 
+        self.grid[4][2] = Cell(4, 2, Unit(wolf, 'Control', 'C')) 
 
         # Set the 'free' control points
-        self.board[2][0] = Cell(2, 0, Unit(None, 'Control', '@'))
-        self.board[2][2] = Cell(2, 2, Unit(None, 'Control', '@'))
-        self.board[2][3] = Cell(2, 3, Unit(None, 'Control', '@'))
-        self.board[2][4] = Cell(2, 4, Unit(None, 'Control', '@'))
+        self.grid[2][0] = Cell(2, 0, Unit(None, 'Control', '@'))
+        self.grid[2][2] = Cell(2, 2, Unit(None, 'Control', '@'))
+        self.grid[2][3] = Cell(2, 3, Unit(None, 'Control', '@'))
+        self.grid[2][4] = Cell(2, 4, Unit(None, 'Control', '@'))
 
     def print_board(self) -> None:
         """
@@ -47,10 +47,10 @@ class Board:
 
         print('\n    0   1   2   3   4')
         print('    -----------------')
-        for i in range(len(self.board)):
+        for i in range(len(self.grid)):
             print(f'{row_letters[i]}|', end='')
-            for j in range(len(self.board[0])):
-                unit: Unit = self.board[i][j].unit
+            for j in range(len(self.grid[0])):
+                unit: Unit = self.grid[i][j].unit
                 if unit.player is not None:
                     print(f'  {unit.unit_symbol}{unit.player.symbol}'.ljust(4), end='')
                 else:
@@ -148,9 +148,9 @@ class Board:
             row not in self.letter_to_num 
             or not col.isdigit()
             or self.letter_to_num[row] < 0 
-            or self.letter_to_num[row] >= len(self.board) 
+            or self.letter_to_num[row] >= len(self.grid) 
             or int(col) < 0 
-            or int(col) >= len(self.board[0])
+            or int(col) >= len(self.grid[0])
             ):
             print('Invalid coordinate input')
             return False
@@ -190,7 +190,7 @@ class Board:
             True if it is a valid end position, False if it is not.
         """
         # Check the to_position is either a control unit or an empty unit
-        unit: Unit = self.board[end_position[0]][end_position[1]].unit
+        unit: Unit = self.grid[end_position[0]][end_position[1]].unit
         # Allow the end position to be a 'Control' unit
         if control_pos_allowed:
             if unit.unit_type != 'Control' and unit.unit_type != 'Empty':
@@ -217,7 +217,7 @@ class Board:
             True if it is a valid attack position, False if it is not.
         """
         # Get the unit at the end position
-        unit: Unit = self.board[end_position[0]][end_position[1]].unit
+        unit: Unit = self.grid[end_position[0]][end_position[1]].unit
         # Check it can only be a unit that doesn't belong to the current player and is not a control or empty unit
         if unit.player == curr_player or unit.unit_type == 'Control' or unit.unit_type == 'Empty':
             print('Can\'t attack own player unit, control units or empty units.')
@@ -257,7 +257,7 @@ class Board:
         coordinate = self.translate_to_coordinate(position)
         row, col = coordinate[0], coordinate[1]
         # Get the unit at that position
-        return self.board[row][col].unit
+        return self.grid[row][col].unit
     
     def is_orthogonal_to_control(self, coordinate: tuple, player: Player) -> bool:
         """
@@ -273,7 +273,7 @@ class Board:
         """
         x, y = coordinate[0], coordinate[1]
         # Check it's not a control point
-        if self.board[x][y].unit.unit_symbol[0] == 'C':
+        if self.grid[x][y].unit.unit_symbol[0] == 'C':
             print('Placing in the same coordinates as a control point is not valid.')
             return False
         
@@ -284,29 +284,29 @@ class Board:
         # Check upward
         if ( 
             x - 1  >= 0 
-            and (self.board[x-1][y].unit.unit_symbol[0] == 'C' or self.board[x-1][y].previous_unit.unit_symbol[0] == 'C') 
-            and self.board[x-1][y].unit.player == player
+            and (self.grid[x-1][y].unit.unit_symbol[0] == 'C' or self.grid[x-1][y].previous_unit.unit_symbol[0] == 'C') 
+            and self.grid[x-1][y].unit.player == player
         ):
             return True 
         # Check rightward
         if (
-            y + 1 < len(self.board[0]) 
-            and (self.board[x][y+1].unit.unit_symbol[0] == 'C' or self.board[x][y+1].previous_unit.unit_symbol[0] == 'C')
-            and self.board[x][y+1].unit.player == player
+            y + 1 < len(self.grid[0]) 
+            and (self.grid[x][y+1].unit.unit_symbol[0] == 'C' or self.grid[x][y+1].previous_unit.unit_symbol[0] == 'C')
+            and self.grid[x][y+1].unit.player == player
         ):
             return True 
         # Check downward
         if (
-            x + 1 < len(self.board) 
-            and (self.board[x+1][y].unit.unit_symbol[0] == 'C' or self.board[x+1][y].previous_unit.unit_symbol[0] == 'C')
-            and self.board[x+1][y].unit.player == player
+            x + 1 < len(self.grid) 
+            and (self.grid[x+1][y].unit.unit_symbol[0] == 'C' or self.grid[x+1][y].previous_unit.unit_symbol[0] == 'C')
+            and self.grid[x+1][y].unit.player == player
         ):
             return True
         # Check leftward
         if (
             y - 1 >= 0 
-            and (self.board[x][y-1].unit.unit_symbol[0] == 'C' or self.board[x][y-1].previous_unit.unit_symbol[0] == 'C') 
-            and self.board[x][y-1].unit.player == player
+            and (self.grid[x][y-1].unit.unit_symbol[0] == 'C' or self.grid[x][y-1].previous_unit.unit_symbol[0] == 'C') 
+            and self.grid[x][y-1].unit.player == player
         ):
             return True
         
@@ -402,10 +402,10 @@ class Board:
         
         # Change the board status given that all of the above operations were valid
         # Revert the previous cell to its previous unit status
-        prev_cell: Cell = self.board[translated_start[0]][translated_start[1]]
+        prev_cell: Cell = self.grid[translated_start[0]][translated_start[1]]
         prev_cell.unit = prev_cell.previous_unit
         # Assign the new cell previous unit to its actual unit, and then change the actual unit to the new unit
-        new_cell: Cell = self.board[translated_end[0]][translated_end[1]]
+        new_cell: Cell = self.grid[translated_end[0]][translated_end[1]]
         new_cell.previous_unit = new_cell.unit
         new_cell.unit = unit
 
@@ -462,8 +462,8 @@ class Board:
         # Place it in the board
         row, col = translated_coordinate[0], translated_coordinate[1]
         # Save it's previous status so we can revert back to it whenever a piece moves from that position
-        self.board[row][col].previous_unit = self.board[row][col].unit
-        self.board[row][col].unit = self.get_unit_from_hand(piece_to_place, player, remove=True)
+        self.grid[row][col].previous_unit = self.grid[row][col].unit
+        self.grid[row][col].unit = self.get_unit_from_hand(piece_to_place, player, remove=True)
 
     def can_attack(self, from_position: str, player: Player, unit: Unit) -> None:
         """
@@ -493,7 +493,7 @@ class Board:
             return
 
         # Change the board status given that all of the above operations were valid
-        attacked_cell: Cell = self.board[translated_end[0]][translated_end[1]]
+        attacked_cell: Cell = self.grid[translated_end[0]][translated_end[1]]
         attacked_cell.unit = attacked_cell.previous_unit
 
     def attack(self, player: Player) -> None:
@@ -548,12 +548,12 @@ class Board:
         # Check it is in fact a control unit
         translated_coordinate = self.translate_to_coordinate(position_to_control) 
         row, col = translated_coordinate[0], translated_coordinate[1]
-        if self.board[row][col].previous_unit.unit_type != 'Control':
+        if self.grid[row][col].previous_unit.unit_type != 'Control':
             print('The current coordinate does not contain a control unit')
             return
         
         # Since none of the above error-check conditions were satisfied, control the coordianate
-        curr_cell = self.board[row][col]
+        curr_cell = self.grid[row][col]
         curr_cell.previous_unit = Unit(player, 'Control', 'C')
         player.control_tokens -= 1
 

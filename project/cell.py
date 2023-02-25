@@ -42,7 +42,7 @@ class Unit:
         x2, y2 = end 
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
-        return (dx == 1 and dy == 0) or (dx == 0 and dy == 1)
+        return (dx == 1 and dy == 0) or (dx == 0 and dy == 1) 
 
 # Archer class with its respective methods and properties
 class Archer(Unit):
@@ -286,3 +286,17 @@ class Cell:
         self.col = col
         self.unit = unit
         self.previous_unit = previous_unit
+
+    def compare(self, cell) -> bool: 
+        """
+        Function used to test that the board has been correctly initialized.
+        """
+        if cell.row != self.row or cell.col != self.col or cell.unit.unit_type != self.unit.unit_type:
+            return False
+        
+        # If both players are not null, we compare their information
+        if cell.unit.player and self.unit.player:
+            if cell.unit.player.name != self.unit.player.name or cell.unit.player.symbol != self.unit.player.symbol:
+                return False
+        
+        return True
