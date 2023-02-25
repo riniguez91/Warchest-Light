@@ -57,8 +57,8 @@ def show_player_information(player: Player):
     if not player.get_hand():
         return False
     player.get_recruitment_units()
-    player.get_discard_pile()
-    player.get_control_tokens()
+    player.print_discard_pile()
+    player.print_control_tokens()
     
     return True
 

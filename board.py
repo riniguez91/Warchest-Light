@@ -18,6 +18,7 @@ class Board:
         # Set the 'free' control points
         self.board[2][0] = Cell(2, 0, Unit(None, 'Control', '@'))
         self.board[2][2] = Cell(2, 2, Unit(None, 'Control', '@'))
+        self.board[2][3] = Cell(2, 3, Unit(None, 'Control', '@'))
         self.board[2][4] = Cell(2, 4, Unit(None, 'Control', '@'))
 
     def print_board(self):
@@ -68,11 +69,6 @@ class Board:
         if not forfeit:
             player.print_hand()
         return forfeit
-
-    def remove_piece_from_hand(self, piece: str, player: Player):
-        for unit in player.hand:
-            if unit.unit_type == piece:
-                player.hand.remove(unit)
 
     def piece_in_hand(self, piece: str, player: Player, remove = False, discard = False):
         for unit in player.hand:
@@ -130,6 +126,16 @@ class Board:
         # Valid cell
         return True
     
+    def valid_attack_position(self, end_position: tuple, curr_player: Player):
+        # Get the unit at the end position
+        unit: Unit = self.board[end_position[0]][end_position[1]].unit
+        # Check it can only be a unit that doesn't belong to the current player and is not a control or empty unit
+        if unit.player == curr_player or unit.unit_type == 'Control' or unit.unit_type == 'Empty':
+            print('Can\'t attack own player unit, control units or empty units.')
+            return False
+        # Valid attack position
+        return True
+    
     def translate_to_coordinate(self, position: str):
         # Get row and column values respectively
         row, col = position.split(',')
@@ -152,17 +158,35 @@ class Board:
         
         # We need to get the first letter of the unit_symbol since a Control point could be associated to a 
         # player and thus the unit_symbol could contain something like 'Cv', so we can't directly compare it
+        # We also need to check if the previous_unit.unit_symbol is a control point as that means that a unit
+        # is directly above a control point, but is still a valid control point
         # Check upward
-        if x - 1  >= 0 and self.board[x-1][y].unit.unit_symbol[0] == 'C' and self.board[x-1][y].unit.player == player:
+        if ( 
+            x - 1  >= 0 
+            and (self.board[x-1][y].unit.unit_symbol[0] == 'C' or self.board[x-1][y].previous_unit.unit_symbol[0] == 'C') 
+            and self.board[x-1][y].unit.player == player
+        ):
             return True 
         # Check rightward
-        if y + 1 < len(self.board[0]) and self.board[x][y+1].unit.unit_symbol[0] == 'C' and self.board[x][y+1].unit.player == player:
+        if (
+            y + 1 < len(self.board[0]) 
+            and (self.board[x][y+1].unit.unit_symbol[0] == 'C' or self.board[x][y+1].previous_unit.unit_symbol[0] == 'C')
+            and self.board[x][y+1].unit.player == player
+        ):
             return True 
         # Check downward
-        if x + 1 < len(self.board) and self.board[x+1][y].unit.unit_symbol[0] == 'C' and self.board[x+1][y].unit.player == player:
+        if (
+            x + 1 < len(self.board) 
+            and (self.board[x+1][y].unit.unit_symbol[0] == 'C' or self.board[x+1][y].previous_unit.unit_symbol[0] == 'C')
+            and self.board[x+1][y].unit.player == player
+        ):
             return True
         # Check leftward
-        if y - 1 >= 0 and self.board[x][y-1].unit.unit_symbol[0] == 'C' and self.board[x][y-1].unit.player == player:
+        if (
+            y - 1 >= 0 
+            and (self.board[x][y-1].unit.unit_symbol[0] == 'C' or self.board[x][y-1].previous_unit.unit_symbol[0] == 'C') 
+            and self.board[x][y-1].unit.player == player
+        ):
             return True
         
         # If none of the above conditions haven't been satisfied then it is not orthogonal to a control point
@@ -195,7 +219,7 @@ class Board:
     
     def move(self, player: Player):
         # Check if the from_position is a valid position
-        from_position = str(input('From position (row, col): '))
+        from_position = str(input('Move from position (row, col): '))
         if not self.valid_board_position(from_position):
             return
         
@@ -206,7 +230,7 @@ class Board:
         
         # Check the piece to move is contained in the hand and the board
         piece = str(input('Select a piece of the same type in your hand: '))
-        if not (self.piece_in_hand(piece, player) and unit.unit_type == piece):
+        if not (self.piece_in_hand(piece, player, remove=True, discard=True) and unit.unit_type == piece):
             return
         
         to_position = str(input('To position (row, col): '))
@@ -222,7 +246,7 @@ class Board:
         if not self.valid_end_position(translated_end):
             return
         
-        # returns True if it was a valid move, False if it was invalid
+        # If it was an invalid move due to the speficic unit coin movement, end the function
         if not unit.move(translated_start, translated_end):
             return
         
@@ -234,8 +258,6 @@ class Board:
         new_cell: Cell = self.board[translated_end[0]][translated_end[1]]
         new_cell.previous_unit = new_cell.unit
         new_cell.unit = unit
-        # Remove from hand
-        self.remove_piece_from_hand(unit.unit_type, player)
 
     def recruit(self, player: Player):
         # Check the piece is in the hand
@@ -279,8 +301,51 @@ class Board:
         self.board[row][col].previous_unit = self.board[row][col].unit
         self.board[row][col].unit = self.get_unit_from_hand(piece_to_place, player, remove=True)
 
+    def can_attack(self, from_position: str, player: Player, unit: Unit):
+        to_position = str(input('To position (row, col): '))
+        # Check if the to_position is a valid position
+        if not self.valid_board_position(to_position):
+            return
+        
+        # Get the translated coordinates
+        translated_start = self.translate_to_coordinate(from_position)
+        translated_end = self.translate_to_coordinate(to_position)
+
+        # Check the to_position contains another player unit (can't attack empty units/control units/own player units)
+        if not self.valid_attack_position(translated_end, player):
+            return
+        
+        # If it was an invalid move due to the speficic unit coin movement, end the function
+        if not unit.attack(translated_start, translated_end):
+            return
+
+        # Change the board status given that all of the above operations were valid
+        attacked_cell: Cell = self.board[translated_end[0]][translated_end[1]]
+        attacked_cell.unit = attacked_cell.previous_unit
+
     def attack(self, player: Player):
-        print('attack message')
+        # Check if the from_position is a valid position
+        from_position = str(input('Attack from position (row, col): '))
+        if not self.valid_board_position(from_position):
+            return
+        
+        unit: Unit = self.get_unit(from_position)
+        # Check the position isn't empty and belongs to the player (but is not a control point)
+        if not self.valid_start_position(unit, player):
+            return 
+        
+        # Check the piece to move is contained in the hand and the board
+        piece = str(input('Select a piece of the same type in your hand: '))
+        if not (self.piece_in_hand(piece, player, remove=True, discard=True) and unit.unit_type == piece):
+            return
+        
+        # Check if the current unit can attack more than once
+        for i in range(unit.no_of_attacks):
+            if i == 1:
+                confirm_attack = str(input(f'This unit can attack {unit.no_of_attacks} times, would you like to attack again? (yes/no): '))
+                if confirm_attack.lower() == 'no':
+                    break
+            self.can_attack(from_position, player, unit)
 
     def control(self, player: Player):
         piece_to_discard = str(input('Piece to discard from hand: '))

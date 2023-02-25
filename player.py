@@ -2,7 +2,7 @@ import random
 
 # Player class with its respective methods and properties
 class Player:
-    def __init__(self, name, symbol):
+    def __init__(self, name, symbol) -> None:
         # Player information
         self.name: str = name
         self.symbol: str = symbol
@@ -72,12 +72,12 @@ class Player:
         return True
 
     # Print the discarded pile for the current player
-    def get_discard_pile(self):
+    def print_discard_pile(self):
         print('Discard pile: ', end='')
         for unit in self.discarded:
             print(f'{unit.unit_type}, ', end='')
         print()
 
-    def get_control_tokens(self):
+    def print_control_tokens(self):
         print(f'\nControl tokens: {self.control_tokens}\n\n')
 
